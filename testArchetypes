@@ -1,0 +1,61 @@
+#!/bin/sh
+
+############################################################
+# - builds all archetypes
+# - builds an test project for each archetype
+# - verifies that the test projects build successfully
+# (use "rm -fr E*litp*" to clean up test projects)
+############################################################
+
+set -e
+export SCRIPT_DIR=`dirname $0`
+
+function get_version() {
+    local v=`mvn org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | sed -n -e '/^\[.*\]/ !{ /^[0-9]/ { p; q } }'`
+    echo $v
+}
+
+function advance_version() {
+    local v=$1
+    local cleaned=`echo $v | sed -e 's/[^0-9][^0-9]*$//'`
+    local last_num=`echo $cleaned | sed -e 's/[0-9]*\.//g'`
+    local next_num=$(($last_num+1))
+    echo $v | sed -e "s/[0-9][0-9]*\([^0-9]*\)$/$next_num/"
+}
+
+function set_version() {
+    local v=$1
+    local cleaned=`echo $v | sed -e 's/[^0-9][^0-9]*$//'`
+    local last_num=`echo $cleaned | sed -e 's/[0-9]*\.//g'`
+    local next_num=$(($last_num+1))
+    echo $v | sed -e "s/[0-9][0-9]*\([^0-9]*\)$/$next_num/"
+}
+
+echo -e "\n### Building All Arechtypes ###\n"
+${SCRIPT_DIR}/buildArchetypes
+
+echo -e "\n### Creating Test Projects ###\n"
+${SCRIPT_DIR}/createLITPProject extension san SAN CXP1234567
+${SCRIPT_DIR}/createLITPProject plugin san SAN CXP1234567
+${SCRIPT_DIR}/createLITPProject library cba CBA CXP1234567
+${SCRIPT_DIR}/createLITPProject puppet firewall 1.0.2 CXP1234567
+${SCRIPT_DIR}/createLITPProject puppet-extension foo Foo CXP1234567
+${SCRIPT_DIR}/createLITPProject puppet-plugin foo Foo CXP1234567
+
+
+echo -e "\n### Building Test Projects ###\n"
+for project in $(ls -d ${SCRIPT_DIR}/E*litp*); do
+    echo -e "\n### Building ${project}"
+    cd ${project}
+    mvn clean install
+    cd -
+done
+
+echo -e "\n### Removing Test Projects ###\n"
+rm -fr ${SCRIPT_DIR}/ERIClitpsanapi
+rm -fr ${SCRIPT_DIR}/ERIClitpsan
+rm -fr ${SCRIPT_DIR}/ERIClitpcbalib
+rm -fr ${SCRIPT_DIR}/EXTRlitppuppetfirewall
+rm -fr ${SCRIPT_DIR}/ERIClitpfooapi
+rm -fr ${SCRIPT_DIR}/ERIClitpfoo
+

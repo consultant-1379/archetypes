@@ -1,0 +1,77 @@
+#!/bin/bash
+
+EXTENSION="extension"
+PLUGIN="plugin"
+PUPPET_EXTENSION="puppet-extension"
+PUPPET_PLUGIN="puppet-plugin"
+PUPPET_MODULE="puppet"
+LIBRARY="library"
+
+TYPE=$1
+
+#echo $TYPE
+if [[ "$TYPE" = "$EXTENSION" ]]; then
+    echo -e "\n### Generating extension $2"
+    EXTENSION_NAME=$2
+    EXTENSION_CLASSNAME=$3
+    EXTENSION_CXP=$4
+    mvn archetype:generate -DarchetypeCatalog=local -DartifactId=ERIClitp${EXTENSION_NAME}api \
+    -DcxpNumber=${EXTENSION_CXP} -DextensionName=${EXTENSION_NAME} -DextensionClassname=${EXTENSION_CLASSNAME} \
+    -DarchetypeGroupId=com.ericsson.nms.litp -DarchetypeArtifactId=litp-extension-archetype \
+    -DarchetypeVersion=RELEASE -DinteractiveMode=false
+elif [[ "$TYPE" = "$PUPPET_EXTENSION" ]]; then
+    echo -e "\n### Generating puppet-extension $2"
+    EXTENSION_NAME=$2
+    EXTENSION_CLASSNAME=$3
+    EXTENSION_CXP=$4
+    mvn archetype:generate -DarchetypeCatalog=local -DartifactId=ERIClitp${EXTENSION_NAME}api \
+    -DcxpNumber=${EXTENSION_CXP} -DextensionName=${EXTENSION_NAME} -DextensionClassname=${EXTENSION_CLASSNAME} \
+    -DarchetypeGroupId=com.ericsson.nms.litp -DarchetypeArtifactId=litp-puppet-extension-archetype \
+    -DarchetypeVersion=RELEASE -DinteractiveMode=false
+elif [[ "$TYPE" = "$PLUGIN" ]]; then
+    echo -e "\n### Generating plugin $2"
+    export PLUGIN_NAME=$2
+    export PLUGIN_CLASSNAME=$3
+    export PLUGIN_CXP=$4
+    mvn archetype:generate -DarchetypeCatalog=local -DartifactId=ERIClitp${PLUGIN_NAME} \
+    -DcxpNumber=${PLUGIN_CXP} -DpluginName=${PLUGIN_NAME} -DpluginClassname=${PLUGIN_CLASSNAME} \
+    -DarchetypeGroupId=com.ericsson.nms.litp -DarchetypeArtifactId=litp-plugin-archetype \
+    -DarchetypeVersion=RELEASE -DinteractiveMode=false
+elif [[ "$TYPE" = "$PUPPET_PLUGIN" ]]; then
+    echo -e "\n### Generating puppet-plugin $2"
+    export PLUGIN_NAME=$2
+    export PLUGIN_CLASSNAME=$3
+    export PLUGIN_CXP=$4
+    mvn archetype:generate -DarchetypeCatalog=local -DartifactId=ERIClitp${PLUGIN_NAME} \
+    -DcxpNumber=${PLUGIN_CXP} -DpluginName=${PLUGIN_NAME} -DpluginClassname=${PLUGIN_CLASSNAME} \
+    -DarchetypeGroupId=com.ericsson.nms.litp -DarchetypeArtifactId=litp-puppet-plugin-archetype \
+    -DarchetypeVersion=RELEASE -DinteractiveMode=false
+elif [[ "$TYPE" = "$PUPPET_MODULE" ]]; then
+    echo -e "\n### Generating puppet-module $2"
+    export MODULE_NAME=$2
+    export MODULE_VERSION=$3
+    export MODULE_CXP=$4
+    mvn archetype:generate -DarchetypeCatalog=local -DartifactId=EXTRlitppuppet${MODULE_NAME} \
+    -DcxpNumber=${MODULE_CXP} -DmoduleName=${MODULE_NAME} -DmoduleVersion=${MODULE_VERSION} \
+    -DarchetypeGroupId=com.ericsson.nms.litp -DarchetypeArtifactId=litp-puppet-archetype \
+    -DarchetypeVersion=RELEASE -DinteractiveMode=false
+elif [[ "$TYPE" = "$LIBRARY" ]]; then
+    echo -e "\n### Generating library $2"
+    export LIBRARY_NAME=$2
+    export LIBRARY_CLASSNAME=$3
+    export LIBRARY_CXP=$4
+    mvn archetype:generate -DarchetypeCatalog=local -DartifactId=ERIClitp${LIBRARY_NAME}lib \
+    -DcxpNumber=${LIBRARY_CXP} -DlibraryName=${LIBRARY_NAME} -DlibraryClassname=${LIBRARY_CLASSNAME} \
+    -DarchetypeGroupId=com.ericsson.nms.litp -DarchetypeArtifactId=litp-library-archetype \
+    -DarchetypeVersion=RELEASE -DinteractiveMode=false
+
+else
+    echo "Usage: $0 plugin|extension|puppet-plugin|puppet-extension|library name classname cxp"
+    echo "Examples: "
+    echo "    $0 extension san SAN CXP1234567"
+    echo "    $0 plugin san SAN CXP1234567"
+    echo "    $0 library cba CBA CXP1234567"
+    echo "    $0 puppet firewall 1.0.2 CXP1234567"
+    echo "    $0 puppet-extension san SAN CXP1234567"
+    echo "    $0 puppet-plugin san SAN CXP1234567"
+fi

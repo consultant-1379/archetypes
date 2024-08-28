@@ -1,0 +1,61 @@
+#!/bin/sh
+
+######################################################
+# - sets the integration POM as specfied
+# - and increments the version of each archetype
+# (use "git checkout *-archetype" to reset changes)
+######################################################
+
+set -e
+export SCRIPT_DIR=`dirname $0`
+
+POM_VERSION=$1
+if [[ "$POM_VERSION" = "" ]]; then
+    echo "Usage: $0 <POM_VERSION>"
+    exit 1
+fi
+
+function get_version() {
+    local v=$(mvn org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate \
+              -Dexpression=project.version \
+              | sed -n -e '/^\[.*\]/ !{ /^[0-9]/ { p; q } }')
+#   local v=$(mvn -q -Dexec.executable="echo" -Dexec.args='${project.version}' \
+#             --non-recursive org.codehaus.mojo:exec-maven-plugin:1.3.1:exec)
+    echo $v
+}
+
+function advance_version() {
+    local v=$1
+    local cleaned=`echo $v | sed -e 's/[^0-9][^0-9]*$//'`
+    local last_num=`echo $cleaned | sed -e 's/[0-9]*\.//g'`
+    local next_num=$(($last_num+1))
+    echo $v | sed -e "s/[0-9][0-9]*\([^0-9]*\)$/$next_num/"
+}
+
+function set_version() {
+    local v=$1
+    local output=`mvn versions:set -DnewVersion="$v"`
+    echo $output
+}
+
+function set_pom_version() {
+    local v=$1
+    local output=$(sed -i -r \
+                   "s#<version>(1.*)<\/version>#<version>$v<\/version>#g" \
+                   src/main/resources/archetype-resources/pom.xml)
+    local remove=$(rm pom.xml.versionsBackup)
+    echo $output
+}
+
+
+echo -e "\n### Setting POM version on Projects ###\n"
+for project in $(ls -d ${SCRIPT_DIR}/*-archetype); do
+    echo -e "\n### Updating ${project}"
+    cd ${project}
+
+    set_version $(advance_version $(get_version))
+    set_pom_version $POM_VERSION
+    cd -
+done
+
+

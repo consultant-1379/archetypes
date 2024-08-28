@@ -1,0 +1,17 @@
+*.pyc
+*.swp
+.project
+.pydevproject
+.coverage
+target
+coverage.xml
+nosetests.xml
+tags
+
+## IntelliJ
+*.idea/
+
+## File-based project format
+*.ipr
+*.iml
+*.iws

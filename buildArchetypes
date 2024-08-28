@@ -1,0 +1,10 @@
+#!/bin/sh
+set -e
+export SCRIPT_DIR=`dirname $0`
+
+for archetype in $(ls -d ${SCRIPT_DIR}/*-archetype/); do
+    echo -e "\n### Installing: ${archetype}"
+    cd ${archetype}
+    mvn clean install
+    cd -
+done
